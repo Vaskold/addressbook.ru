@@ -28,7 +28,7 @@ function save($name, $lastName, $phone)
         $errors[] = "Поле Имя не должно быть пустым";
     if (empty($lastName))
         $errors[] = "Поле Фамилия не должно быть пустым";
-    if (empty($lastName))
+    if (empty($phone))
         $errors[] = "Поле Телефон не должно быть пустым";
 
     if (count($errors) != 0)
@@ -45,7 +45,8 @@ function save($name, $lastName, $phone)
         return $errors;
 
     $line = "$name|$lastName|$phone";
-    file_put_contents('addressbook.txt', "\r\n" . $line);
+    $f = file_get_contents('addressbook.txt');
+    file_put_contents('addressbook.txt', $f . $line . "\n");
 }
 
 if($_SERVER["REQUEST_METHOD"] == "POST")
@@ -82,14 +83,24 @@ function getList()
     return $result;
 }
 
+
+$search = strip_tags(trim($_GET["last_name"]));
+
+if($search == "")
+    $addressbook = getList();
+else
+    $addressbook = search($search);
+
 function search($lastName) {
     $result = Array();
     $lines = file('addressbook.txt');
     $i = 0;
-    foreach ($lines as $line_num => $line) {
+    foreach ($lines as $line_num => $line)
+    {
         $values = explode("|", $line);
         $pos = stripos($values[1], $lastName);
-        if(strlen($lastName) >= 3 && $pos !== false) {
+        if(strlen($lastName) >= 3 && $pos !== false)
+        {
             $result[$i]["NAME"] = $values[0];
             $result[$i]["LAST_NAME"] = $values[1];
             $result[$i]["PHONE"] = $values[2];
@@ -101,22 +112,7 @@ function search($lastName) {
     return $result;
 }
 
-if($_SERVER["REQUEST_METHOD"] == "POST") {
-    $errors = save($_POST["first_name"], $_POST["last_name"], $_POST["phone"]);
-    if(!isset($errors)) {
-        header("Location: index.php");
-        exit(0);
-    }
-}
-
 $deleteId = strip_tags(trim($_GET["delete_id"]));
-$search = strip_tags(trim($_GET["search"]));
-
-if($search == "")
-    $addressbook = getList();
-else
-    $addressbook = search($search);
-
 if($deleteId != "")
 {
     $lines = file('addressbook.txt');
@@ -164,8 +160,8 @@ if($deleteId != "")
         <td>
             <h3>Поиск контакта</h3> <br>
             <form method="get">
-                <input type="text" name="name" placeholder="Кого вы ищете?">
-                <input type="button" name="finder" value="Найти">
+                <input type="text" name="last_name" placeholder="Кого вы ищете?">
+                <input type="submit" value="Найти">
             </form>
 
         </td>
@@ -175,8 +171,8 @@ if($deleteId != "")
         <td>
             <h3>Новый контакт</h3> <br>
             <form method="POST">
-                <input type="text" name="first_name" placeholder="Имя" value="<?=$_POST['first_name']?>">
                 <input type="text" name="last_name" placeholder="Фамилия" value="<?=$_POST['last_name']?>">
+                <input type="text" name="first_name" placeholder="Имя" value="<?=$_POST['first_name']?>">
                 <input type="text" name="phone" placeholder="Телефон" value="<?=$_POST['phone']?>">
                 <input type="submit" name="save" value="Добавить контакт">
                 <?if(isset($errors)):?>
@@ -193,15 +189,15 @@ if($deleteId != "")
             <h3>Телефонная книга</h3> <br>
             <table>
                 <tr>
-                    <th>Имя</th>
                     <th>Фамилия</th>
+                    <th>Имя</th>
                     <th>Номер</th>
                     <th>Действие</th>
                 </tr>
                 <? foreach ($addressbook as $line_num => $line):?>
                     <tr>
-                        <td><?=$line["NAME"];?></td>
                         <td><?=$line["LAST_NAME"];?></td>
+                        <td><?=$line["NAME"];?></td>
                         <td><?=$line["PHONE"];?></td>
                         <td><a href="?delete_id=<?=$line['LINE_NUM'];?>">Удалить</a></td>
                     </tr>
