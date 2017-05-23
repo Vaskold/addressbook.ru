@@ -1,15 +1,6 @@
 <?php
 header("Content-Type: text/html; charset=utf-8");
 
-/*
- * не готово:
- * Поиск
- * Валидация
- * Сортировка
- * Удаление
- * Функции
- * */
-
 function clear($value)
 {
     $result = strip_tags(trim($value));
@@ -59,7 +50,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
     }
 }
 
-function myCmp($a, $b)
+function Cmp($a, $b)
 {
     if ($a['LAST_NAME'] == $b['LAST_NAME'])
         return 0;
@@ -79,7 +70,7 @@ function getList()
         $result[$i]["LINE_NUM"] = $line_num;
         $i++;
     }
-    usort($result, 'myCmp');
+    usort($result, 'Cmp');
     return $result;
 }
 
@@ -108,7 +99,7 @@ function search($lastName) {
             $i++;
         }
     }
-    usort($result, 'myCmp');
+    usort($result, 'Cmp');
     return $result;
 }
 
